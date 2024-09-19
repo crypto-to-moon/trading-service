@@ -25,29 +25,20 @@ public class NacosService {
         List<Instance> allInstances = new ArrayList<>();
         try {
             Properties properties = new Properties();
-            properties.setProperty("serverAddr", "nacos");
+            properties.setProperty("serverAddr", "nacos:8848");
             properties.setProperty("namespace", "public");
+            properties.setProperty("username", "nacos");
+            properties.setProperty("password", "nacos");
             NamingService nacosNamingService = NamingFactory.createNamingService(properties);
             allInstances = nacosNamingService.getAllInstances("node");
         } catch (NacosException e) {
-            System.out.println("NacosException:" + e);
+            log.error("NacosException:", e);
         }
         return allInstances;
     }
 
-    public String[] getHostnames() {
-        List<Instance> allInstance = this.getAllInstance();
-        String[] hostnames = new String[3];
-        for (int i = 0; i < 3; i++) {
-            Instance instance = allInstance.get(i);
-            int nodeId = Integer.parseInt(instance.getMetadata().get("nodeId"));
-            hostnames[nodeId] = instance.getIp();
-        }
-        return hostnames;
-    }
-
     public Instance getSelf() {
-        final int nodeId = parseInt(System.getProperty("nodeId", "0"));
+        final int nodeId = parseInt(System.getenv("nodeId"));
         for (Instance instance : this.getAllInstance()) {
             int id = parseInt(instance.getMetadata().get("nodeId"));
             if (id == nodeId) {
@@ -58,7 +49,7 @@ public class NacosService {
     }
 
     public void update(long size)  {
-        final int nodeId = parseInt(System.getProperty("nodeId", "0"));
+        final int nodeId = parseInt(System.getenv("nodeId"));
         for (Instance instance : this.getAllInstance()) {
             int id = parseInt(instance.getMetadata().get("nodeId"));
             if (id == nodeId) {
@@ -68,7 +59,7 @@ public class NacosService {
                 try {
                     namingService.registerInstance("node", instance);
                 } catch (NacosException e) {
-                    log.error("update error");
+                    log.error("update error, ", e);
                 }
             }
         }
@@ -85,7 +76,7 @@ public class NacosService {
                 try {
                     namingService.registerInstance("node", instance);
                 } catch (NacosException e) {
-                    log.error("update error");
+                    log.error("update error", e);
                 }
             }
         }

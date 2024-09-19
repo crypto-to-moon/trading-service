@@ -37,8 +37,8 @@ public class Node {
     @Autowired
     NacosService nacosService;
 
-    public void init() throws UnknownHostException {
-        final int nodeId = parseInt(System.getProperty("nodeId", "0"));
+    public void init() {
+        final int nodeId = parseInt(System.getenv("nodeId"));
         List<Instance> allInstance;
         while (true) {
             allInstance = nacosService.getAllInstance();
