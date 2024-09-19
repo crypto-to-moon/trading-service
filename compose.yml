@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  nacos:
+    image: centralx/nacos-server
+    container_name: nacos
+    restart: always
+    environment:
+      - MODE=standalone
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+
+  node0:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: node:2.0
+    container_name: node0
+    environment:
+      - nodeId=0
+    ports:
+      - "8080:8080"
+    volumes:
+      - /tmp/cluster:/app/cluster
+    shm_size: 1G
+    depends_on:
+      - nacos
+
+  node1:
+    image: node:2.0
+    container_name: node1
+    environment:
+      - nodeId=1
+    ports:
+      - "8081:8080"
+    volumes:
+      - /tmp/cluster:/app/cluster
+    shm_size: 1G
+    depends_on:
+      - nacos
+
+  node2:
+    image: node:2.0
+    container_name: node2
+    environment:
+      - nodeId=2
+    ports:
+      - "8082:8080"
+    volumes:
+      - /tmp/cluster:/app/cluster
+    shm_size: 1G
+    depends_on:
+      - nacos

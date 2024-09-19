@@ -15,8 +15,11 @@ import static java.lang.Integer.parseInt;
 public class Main {
     public static void main(String[] args) {
 
-//        System.setProperty("aeron.debug.timeout","3600S");
-        SpringApplication.run(Main.class,args);
-        System.out.println("http://localhost:8080/");
+        try {
+            SpringApplication.run(Main.class, args);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
+
 }

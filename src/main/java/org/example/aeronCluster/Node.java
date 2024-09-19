@@ -42,7 +42,7 @@ public class Node {
         List<Instance> allInstance;
         while (true) {
             allInstance = nacosService.getAllInstance();
-            if (allInstance.size() == 1) {
+            if (allInstance.size() == 3) {
                 break;
             }
             System.out.println("等待 Node 启动: size:" + allInstance.size());

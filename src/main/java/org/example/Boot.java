@@ -12,6 +12,10 @@ public class Boot implements ApplicationRunner {
     Node node;
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        node.init();
+        try {
+            node.init();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
 }

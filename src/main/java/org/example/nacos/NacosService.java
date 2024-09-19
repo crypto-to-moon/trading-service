@@ -5,11 +5,11 @@ import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.pojo.Instance;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -22,10 +22,10 @@ public class NacosService {
 
 
     public List<Instance> getAllInstance() {
-        List<Instance> allInstances = Lists.newArrayList();
+        List<Instance> allInstances = new ArrayList<>();
         try {
             Properties properties = new Properties();
-            properties.setProperty("serverAddr", "localhost");
+            properties.setProperty("serverAddr", "nacos");
             properties.setProperty("namespace", "public");
             NamingService nacosNamingService = NamingFactory.createNamingService(properties);
             allInstances = nacosNamingService.getAllInstances("node");
@@ -91,12 +91,16 @@ public class NacosService {
         }
     }
     private NamingService getNamingService() {
-
+        Properties properties = new Properties();
+        properties.setProperty("serverAddr", "nacos:8848");
+        properties.setProperty("namespace", "public");
+        properties.setProperty("username", "nacos");
+        properties.setProperty("password", "nacos");
         NamingService nacos = null;
         try {
-            nacos = NamingFactory.createNamingService("nacos");
+            nacos = NamingFactory.createNamingService(properties);
         } catch (NacosException e) {
-            log.error("can not get Naming service");
+            log.error("Cannot get Naming service", e);
         }
         return nacos;
     }
@@ -105,6 +109,9 @@ public class NacosService {
     @Bean
     public NacosDiscoveryProperties nacosDiscoveryProperties() {
         NacosDiscoveryProperties nacosDiscoveryProperties = new NacosDiscoveryProperties();
+        nacosDiscoveryProperties.setServerAddr("nacos:8848");
+        nacosDiscoveryProperties.setUsername("nacos");
+        nacosDiscoveryProperties.setPassword("nacos");
         Map<String, String> metadata = nacosDiscoveryProperties.getMetadata();
         metadata.put("nodeId", System.getProperty("nodeId", "0"));
         return nacosDiscoveryProperties;
