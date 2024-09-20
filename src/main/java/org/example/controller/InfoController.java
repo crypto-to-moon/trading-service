@@ -45,7 +45,7 @@ public class InfoController {
     }
 
     @GetMapping("/put")
-    public String put(@RequestParam Long key, @RequestParam String value) {
+    public String put(@RequestParam(name = "key") Long key, @RequestParam(name = "value") String value) {
         if (!client.isInit()) {
             return "此节点没有client，访问 leader 发送数据";
         }
@@ -61,7 +61,7 @@ public class InfoController {
     @GetMapping("/nodeData")
     public String nodeData() {
         List<RaftData> clusterData = clusterService.getClusterData();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < clusterData.size(); i++) {
             RaftData raftData = clusterData.get(i);
             sb.append("[").append(i).append("] ").append(raftData).append("<br />");

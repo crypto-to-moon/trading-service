@@ -1,0 +1,7 @@
+### GET request to example server
+GET localhost:8080/nodeData
+
+###
+
+
+GET http://localhost:8080/put?key=123&value=123String

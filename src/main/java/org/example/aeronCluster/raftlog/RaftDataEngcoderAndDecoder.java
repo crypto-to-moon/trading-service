@@ -11,8 +11,7 @@ public class RaftDataEngcoderAndDecoder {
         buffer.putLong(0, key);
         buffer.putInt(8, value.length());
         buffer.putBytes(12, value.getBytes());
-        int length = 12 + value.length();
-        return length;
+        return 12 + value.length();
     }
 
     public static RaftData decoder(DirectBuffer buffer, int offset, List<RaftData> clusterData) {

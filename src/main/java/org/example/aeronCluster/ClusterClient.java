@@ -39,10 +39,10 @@ public class ClusterClient implements Agent {
         log.info("初始化 client");
 
         // get 3 Node ip
-        String[] hostnames = {"127.0.0.1"};
+        String[] hostnames = {System.getenv("HOST_NAME")};
         final String hostname = InetAddress.getLocalHost().getHostAddress();
         final String ingressEndpoints = AeronCommon.ingressEndpoints(Arrays.asList(hostnames));
-        log.info("[ClientConfig] ingressEndpoints:" + ingressEndpoints);
+        log.info("[ClientConfig] ingressEndpoints:{}", ingressEndpoints);
 
         // tag::connect[]
         MediaDriver mediaDriver = MediaDriver.launchEmbedded(new MediaDriver.Context()

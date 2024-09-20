@@ -10,6 +10,7 @@ import io.aeron.cluster.service.ClusteredServiceContainer;
 import io.aeron.driver.MediaDriver;
 import io.aeron.driver.MinMulticastFlowControlSupplier;
 import io.aeron.driver.ThreadingMode;
+import lombok.extern.slf4j.Slf4j;
 import org.agrona.concurrent.NoOpLock;
 import org.agrona.concurrent.ShutdownSignalBarrier;
 import org.example.aeronCluster.utils.AeronCommon;
@@ -29,6 +30,7 @@ import static java.lang.Integer.parseInt;
 import static org.example.aeronCluster.utils.AeronCommon.LOG_CONTROL_PORT_OFFSET;
 import static org.example.aeronCluster.utils.AeronCommon.udpChannel;
 
+@Slf4j
 @Component
 public class Node {
     @Autowired
@@ -45,7 +47,7 @@ public class Node {
             if (allInstance.size() == 3) {
                 break;
             }
-            System.out.println("等待 Node 启动: size:" + allInstance.size());
+            log.info("等待 Node 启动: size:{}", allInstance.size());
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -54,7 +56,7 @@ public class Node {
         }
 
 //        String[] hostnames = Lists.newArrayList("localhost").toArray(new String[]{});
-        final String hostname = "127.0.0.1";
+        String hostname = System.getenv("HOST_NAME");
 
         final File baseDir = new File(System.getProperty("user.dir"), "node" + nodeId);
         final String aeronDirName = baseDir + "/aeronDirName";
@@ -63,11 +65,11 @@ public class Node {
 
         final File clusterDir = new File(baseDir, "cluster");
         AeronCommon.clusterDir = clusterDir;
-        System.out.println("[config] hostname:" + hostname);
-        System.out.println("[config] baseDir:" + baseDir);
-        System.out.println("[config] aeronDirName:" + aeronDirName);
-        System.out.println("[config] archiveDir:" + archiveDir.getAbsolutePath());
-        System.out.println("[config] clusterDir:" + clusterDir.getAbsolutePath());
+        log.info("[config] hostname:{}", hostname);
+        log.info("[config] baseDir:{}", baseDir);
+        log.info("[config] aeronDirName:{}", aeronDirName);
+        log.info("[config] archiveDir:{}", archiveDir.getAbsolutePath());
+        log.info("[config] clusterDir:{}", clusterDir.getAbsolutePath());
 
         final ShutdownSignalBarrier barrier = new ShutdownSignalBarrier();
         // end::main[]
@@ -92,9 +94,11 @@ public class Node {
         final AeronArchive.Context aeronArchiveContext = new AeronArchive.Context().messageTimeoutNs(TimeUnit.SECONDS.toNanos(50)).lock(NoOpLock.INSTANCE).controlRequestChannel(archiveContext.localControlChannel()).controlResponseChannel(archiveContext.localControlChannel()).aeronDirectoryName(aeronDirName);
         // end::archive_client[]
 //
-        System.out.println("[config]clusterMembers: " + AeronCommon.clusterMembers(Arrays.asList("127.0.0.1")));
+//        String clusterMembers = "0,node0:9002,node1:9003,node2:9004,node0:9005,node0:9001|";
+        String clusterMembers = AeronCommon.clusterMembers(List.of("node0", "node1", "node2"));
+        log.info("[config]clusterMembers: {}", clusterMembers);
         // tag::consensus_module[]
-        final ConsensusModule.Context consensusModuleContext = new ConsensusModule.Context().errorHandler(AeronCommon.errorHandler("Consensus Module")).clusterMemberId(nodeId).clusterMembers(AeronCommon.clusterMembers(Arrays.asList("localhost"))).clusterDir(clusterDir)
+        final ConsensusModule.Context consensusModuleContext = new ConsensusModule.Context().errorHandler(AeronCommon.errorHandler("Consensus Module")).clusterMemberId(nodeId).clusterMembers(clusterMembers).clusterDir(clusterDir)
 //                .serviceCount(2)
                 .replicationChannel(AeronCommon.logReplicationChannel(hostname)).logChannel(AeronCommon.logControlChannel(nodeId, hostname, LOG_CONTROL_PORT_OFFSET)).consensusChannel(AeronCommon.consensusChannal(hostname, MEMBER_FACING_PORT_OFFSET)).ingressChannel(AeronCommon.ingressChannel(hostname, CLIENT_FACING_PORT_OFFSET)).archiveContext(aeronArchiveContext.clone()).isIpcIngressAllowed(true);
         // end::consensus_module[]
@@ -114,7 +118,7 @@ public class Node {
         ClusteredServiceContainer.launch(clusteredServiceContext);
 
         // end::running[]
-        System.out.println("[" + nodeId + "] Started Cluster Node on " + hostname + "...");
+        log.info("[{}] Started Cluster Node on " + hostname + "...", nodeId);
     }
 
 }
