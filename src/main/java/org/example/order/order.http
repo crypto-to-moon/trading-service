@@ -1,0 +1,12 @@
+POST localhost:8081/order
+Content-Type: application/json
+
+{
+    "userId": 123,
+    "symbol": "BTC/USD",
+    "orderType": "LIMIT",
+    "side": "BUY",
+    "price": 30000,
+    "quantity": 0.5,
+    "orderClientId": "123456"
+}

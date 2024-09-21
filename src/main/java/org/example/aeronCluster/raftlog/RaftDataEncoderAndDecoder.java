@@ -1,12 +1,14 @@
 package org.example.aeronCluster.raftlog;
 
+import lombok.Data;
 import org.agrona.DirectBuffer;
 import org.agrona.MutableDirectBuffer;
 
+import java.io.Serializable;
 import java.util.List;
 
 
-public class RaftDataEngcoderAndDecoder {
+public class RaftDataEncoderAndDecoder {
     public static int encoder(MutableDirectBuffer buffer, Long key, String value) {
         buffer.putLong(0, key);
         buffer.putInt(8, value.length());
@@ -27,4 +29,15 @@ public class RaftDataEngcoderAndDecoder {
     }
 
 
+    @Data
+    public static class RaftData implements Serializable {
+        long key;
+        String value;
+
+        public RaftData(long key, String value) {
+            this.key = key;
+            this.value = value;
+        }
+
+    }
 }

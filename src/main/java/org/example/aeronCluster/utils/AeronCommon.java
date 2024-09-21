@@ -52,23 +52,21 @@ public class AeronCommon {
                 .build();
     }
 
-    public static String clusterMembers(final List<String> hostnames)
-    {
-        final StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < hostnames.size(); i++)
-        {
-            sb.append(i);
-            sb.append(',').append(hostnames.get(i)).append(':').append(calculatePort(i, CLIENT_FACING_PORT_OFFSET));
-            sb.append(',').append(hostnames.get(i)).append(':').append(calculatePort(i, MEMBER_FACING_PORT_OFFSET));
-            sb.append(',').append(hostnames.get(i)).append(':').append(calculatePort(i, LOG_PORT_OFFSET));
-            sb.append(',').append(hostnames.get(i)).append(':').append(calculatePort(i, TRANSFER_PORT_OFFSET));
-            sb.append(',').append(hostnames.get(i)).append(':')
-                    .append(calculatePort(i, ARCHIVE_CONTROL_PORT_OFFSET));
-            sb.append('|');
+    public static String clusterMembers(List<String> hostnames) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < hostnames.size(); i++) {
+            String hostname = hostnames.get(i);
+            sb.append(i).append(',')
+                    .append(hostname).append(':').append(calculatePort(i, CLIENT_FACING_PORT_OFFSET)).append(',')
+                    .append(hostname).append(':').append(calculatePort(i, MEMBER_FACING_PORT_OFFSET)).append(',')
+                    .append(hostname).append(':').append(calculatePort(i, LOG_PORT_OFFSET)).append(',')
+                    .append(hostname).append(':').append(calculatePort(i, TRANSFER_PORT_OFFSET)).append(',')
+                    .append(hostname).append(':').append(calculatePort(i, ARCHIVE_CONTROL_PORT_OFFSET))
+                    .append('|');
         }
-
         return sb.toString();
     }
+
 
     public static String logControlChannel(final int nodeId, final String hostname, final int portOffset)
     {
@@ -80,33 +78,32 @@ public class AeronCommon {
                 .controlEndpoint(hostname + ":" + port)
                 .build();
     }
-    public static String consensusChannal(final String hostname, final int portOffset) {
-        final int port = calculatePort(0,portOffset);
+    public static String consensusChannal(int nodeId, String hostname, final int portOffset) {
+        final int port = calculatePort(nodeId, portOffset);
         return new ChannelUriStringBuilder(CONSENSUS_CHANNAL)
                 .endpoint(hostname + ":" + port)
                 .build();
     }
-    public static String ingressEndpoints(final List<String> hostnames) {
-        final StringBuilder sb = new StringBuilder();
+    public static String ingressEndpoints(List<String> hostnames) {
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < hostnames.size(); i++) {
-            sb.append(i).append('=');
-            sb.append(hostnames.get(i)).append(':').append(
-                    calculatePort(i, CLIENT_FACING_PORT_OFFSET));
-            sb.append(',');
+            String hostname = hostnames.get(i);
+            sb.append(i).append('=').append(hostname).append(':').append(calculatePort(i, CLIENT_FACING_PORT_OFFSET));
+            if (i != hostnames.size() - 1) {
+                sb.append(',');
+            }
         }
-
-        sb.setLength(sb.length() - 1);
-
         return sb.toString();
     }
-    public static String ingressChannel(String hostname,int offset){
-        final int port = calculatePort(0,offset);
+
+    public static String ingressChannel(int nodeId, String hostname,int offset){
+        final int port = calculatePort(nodeId, offset);
         return new ChannelUriStringBuilder("aeron:udp")
                 .endpoint(hostname + ":" + port)
                 .build();
     }
 
     public static int calculatePort(final int nodeId, final int offset) {
-        return PORT_BASE + offset;
+        return PORT_BASE + (nodeId * 100) + offset;
     }
 }

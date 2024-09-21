@@ -94,13 +94,37 @@ public class Node {
         final AeronArchive.Context aeronArchiveContext = new AeronArchive.Context().messageTimeoutNs(TimeUnit.SECONDS.toNanos(50)).lock(NoOpLock.INSTANCE).controlRequestChannel(archiveContext.localControlChannel()).controlResponseChannel(archiveContext.localControlChannel()).aeronDirectoryName(aeronDirName);
         // end::archive_client[]
 //
-//        String clusterMembers = "0,node0:9002,node1:9003,node2:9004,node0:9005,node0:9001|";
         String clusterMembers = AeronCommon.clusterMembers(List.of("node0", "node1", "node2"));
         log.info("[config]clusterMembers: {}", clusterMembers);
         // tag::consensus_module[]
-        final ConsensusModule.Context consensusModuleContext = new ConsensusModule.Context().errorHandler(AeronCommon.errorHandler("Consensus Module")).clusterMemberId(nodeId).clusterMembers(clusterMembers).clusterDir(clusterDir)
-//                .serviceCount(2)
-                .replicationChannel(AeronCommon.logReplicationChannel(hostname)).logChannel(AeronCommon.logControlChannel(nodeId, hostname, LOG_CONTROL_PORT_OFFSET)).consensusChannel(AeronCommon.consensusChannal(hostname, MEMBER_FACING_PORT_OFFSET)).ingressChannel(AeronCommon.ingressChannel(hostname, CLIENT_FACING_PORT_OFFSET)).archiveContext(aeronArchiveContext.clone()).isIpcIngressAllowed(true);
+//        final ConsensusModule.Context consensusModuleContext = new ConsensusModule.Context()
+//                .errorHandler(
+//                        AeronCommon.errorHandler("Consensus Module"))
+//                .clusterMemberId(nodeId)
+//                .clusterMembers(clusterMembers)
+//                .clusterDir(clusterDir)
+////                .serviceCount(2)
+//                .replicationChannel(
+//                        AeronCommon.logReplicationChannel(hostname)
+//                )
+//                .logChannel(
+//                        AeronCommon.logControlChannel(nodeId, hostname, LOG_CONTROL_PORT_OFFSET))
+//                .consensusChannel(
+//                        AeronCommon.consensusChannal(hostname, MEMBER_FACING_PORT_OFFSET))
+//                .ingressChannel(AeronCommon.ingressChannel(hostname, CLIENT_FACING_PORT_OFFSET))
+//                .archiveContext(aeronArchiveContext.clone())
+//                .isIpcIngressAllowed(true);
+        final ConsensusModule.Context consensusModuleContext = new ConsensusModule.Context()
+                .errorHandler(AeronCommon.errorHandler("Consensus Module"))
+                .clusterMemberId(nodeId)
+                .clusterMembers(clusterMembers)
+                .clusterDir(clusterDir)
+                .replicationChannel(AeronCommon.logReplicationChannel(hostname))
+                .logChannel(AeronCommon.logControlChannel(nodeId, hostname, LOG_CONTROL_PORT_OFFSET))
+                .consensusChannel(AeronCommon.consensusChannal(nodeId, hostname, MEMBER_FACING_PORT_OFFSET))
+                .ingressChannel(AeronCommon.ingressChannel(nodeId, hostname, CLIENT_FACING_PORT_OFFSET))
+                .archiveContext(aeronArchiveContext.clone())
+                .isIpcIngressAllowed(true);
         // end::consensus_module[]
 
         List<ClusteredServiceContainer.Context> serviceContexts = new ArrayList<>();
