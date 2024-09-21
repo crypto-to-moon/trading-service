@@ -146,17 +146,7 @@ public class ClusterService implements ClusteredService {
     public void onRoleChange(Cluster.Role newRole) {
         log.info("[ClusterService] Role changed to: {}", newRole);
         printInfo("onRoleChange:", newRole.toString());
-//        AgentRunner agentRunner = null;
-//        try {
-//            agentRunner = new AgentRunner(new SleepingIdleStrategy(), (throwable -> {
-//                log.info(throwable.toString());
-//                throwable.printStackTrace();
-//            }), null, new ClusterClient(clientService));
-//        } catch (UnknownHostException e) {
-//            throw new RuntimeException(e);
-//        }
-//        AgentRunner.startOnThread(agentRunner);
-        nacosService.updateRole(true);
+        nacosService.updateRole(newRole == Cluster.Role.LEADER);
     }
 
     @Override

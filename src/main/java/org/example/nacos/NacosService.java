@@ -105,6 +105,7 @@ public class NacosService {
         nacosDiscoveryProperties.setPassword("nacos");
         Map<String, String> metadata = nacosDiscoveryProperties.getMetadata();
         metadata.put("nodeId", System.getProperty("nodeId", "0"));
+        metadata.put("isLeader", "false");
         return nacosDiscoveryProperties;
     }
 
