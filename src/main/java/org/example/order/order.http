@@ -8,5 +8,5 @@ Content-Type: application/json
     "side": "BUY",
     "price": 30000,
     "quantity": 0.5,
-    "orderClientId": "123456"
+    "clientOrderId": "123456"
 }

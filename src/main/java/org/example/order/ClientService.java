@@ -1,5 +1,6 @@
 package org.example.order;
 
+import io.aeron.cluster.client.AeronCluster;
 import io.aeron.cluster.client.EgressListener;
 import io.aeron.cluster.codecs.EventCode;
 import io.aeron.cluster.service.Cluster;
@@ -10,6 +11,7 @@ import org.agrona.concurrent.AgentRunner;
 import org.agrona.concurrent.SleepingIdleStrategy;
 import org.example.aeronCluster.ClusterClient;
 import org.example.aeronCluster.snapshot.Deserializer;
+import org.example.aeronCluster.utils.AeronCommon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationEvent;
@@ -102,6 +104,11 @@ public class ClientService implements EgressListener {
     public void onSessionEvent(long correlationId, long clusterSessionId, long leadershipTermId, int leaderMemberId, EventCode code, String detail) {
         log.info("[ClientService] onSessionEvent: correlationId={}, clusterSessionId={}, code={}, detail={}",
                 correlationId, clusterSessionId, code, detail);
+
+        if (code == EventCode.CLOSED) {
+            log.warn("[ClientService] Connection closed, will attempt to reconnect.");
+            // Set a flag to indicate reconnection is needed
+        }
     }
 
     @Override
@@ -117,6 +124,9 @@ public class ClientService implements EgressListener {
             if (future != null) {
                 OrderController.OrderResponse response = new OrderController.OrderResponse();
                 response.setOrderId(order.getOrderId());
+                response.setStatus(order.getStatus().name());
+                response.setMessage("");
+                response.setClientOrderId(order.getClientOrderId());
                 future.complete(response);
             }
         } else {

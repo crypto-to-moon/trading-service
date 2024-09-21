@@ -37,12 +37,17 @@ public class ClusterClient implements Agent {
 
     private final EgressListener egressListener;
 
+    @Getter
+    private volatile boolean running = true;
+
     public ClusterClient(EgressListener egressListener) throws UnknownHostException {
         this.egressListener = egressListener;
         this.aeronCluster = init(); // 初始化 AeronCluster
+        Thread clientThread = new Thread(this::runClientAgent);
+        clientThread.start();
     }
 
-    private AeronCluster init() throws UnknownHostException {
+    public AeronCluster init() {
         try {
             log.info("Initializing ClusterClient");
 
@@ -61,15 +66,28 @@ public class ClusterClient implements Agent {
                             .aeronDirectoryName(mediaDriver.aeronDirectoryName())
                             .ingressChannel("aeron:udp")
                             .egressChannel(AeronCommon.udpChannel(nodeId, hostname, AeronCommon.CLIENT_RESPONSE_PORT_OFFSET))
+                            .messageTimeoutNs(TimeUnit.SECONDS.toNanos(3))
                             .ingressEndpoints(ingressEndpoints));
 
             isInitialized.set(true);
             log.info("[ClusterClient] Client initialized successfully");
+
             return aeronCluster;
 
         } catch (Exception e) {
             log.error("Failed to initialize ClusterClient", e);
             throw new RuntimeException(e);
+        }
+
+    }
+
+    private void runClientAgent() {
+        while (running) {
+            int fragments = aeronCluster.pollEgress();
+            if (fragments == 0) {
+                aeronCluster.sendKeepAlive();
+            }
+            idleStrategy.idle(fragments);
         }
     }
 
@@ -115,7 +133,8 @@ public class ClusterClient implements Agent {
 
     @Override
     public void onClose() {
-        Agent.super.onClose();
+        running = false;
+        aeronCluster.close();
     }
 
     @Override
@@ -138,4 +157,7 @@ public class ClusterClient implements Agent {
         return true;
     }
 
+    public void close() {
+        this.onClose();
+    }
 }
