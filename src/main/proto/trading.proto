@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package com.github.crypto.to.moon.trading.service.trading;
+
+message EventMessage {
+
+    EventType eventType = 1;
+    int64 requestId = 2;
+    int64 timestamp = 3;
+
+    reserved 4 to 15;
+    oneof event {
+        OrderRequest orderRequest = 16;
+        OrderUpdate orderUpdate = 17;
+        TradeEvent tradeEvent = 18;
+        MarketDataUpdate marketDataUpdate = 19;
+        MatchingResult matchingResult = 20;
+    }
+
+}
+
+// 订单方向
+enum OrderSide {
+  BUY = 0;
+  SELL = 1;
+}
+
+// 订单类型
+enum OrderType {
+  LIMIT = 0;
+  MARKET = 1;
+}
+
+// 订单状态
+enum OrderStatus {
+  NEW = 0;
+  PARTIALLY_FILLED = 1;
+  FILLED = 2;
+  CANCELED = 3;
+}
+
+// 事件类型
+enum EventType {
+  ORDER_REQUEST = 0;
+  ORDER_UPDATE = 1;
+  TRADE_EVENT = 2;
+  MARKET_DATA_UPDATE = 3;
+  PLACE_ORDER = 4;
+}
+
+// 订单请求
+message OrderRequest {
+  string orderId = 1;
+  int64 userId = 2;
+  string symbol = 3;
+  OrderSide side = 4;
+  OrderType type = 5;
+  bytes price = 6;
+  bytes amount = 7;
+}
+
+// 订单更新
+message OrderUpdate {
+  string orderId = 1;
+  OrderStatus status = 2;
+}
+
+// 成交事件
+message TradeEvent {
+  string tradeId = 1;
+  string buyOrderId = 2;
+  string sellOrderId = 3;
+  string symbol = 4;
+  bytes price = 5;
+  bytes amount = 6;
+  int64 timestamp = 7;
+}
+
+// 市场数据更新
+message MarketDataUpdate {
+  string symbol = 1;
+  bytes lastPrice = 2;
+  bytes bidPrice = 3;
+  bytes askPrice = 4;
+  bytes volume = 5;
+  int64 timestamp = 6;
+}
+
+message MatchingResult {
+  OrderUpdate orderUpdate = 1;
+  TradeEvent tradeEvent = 2;
+}
